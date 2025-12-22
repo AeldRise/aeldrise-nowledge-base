@@ -3,47 +3,89 @@
 ## Файл `template.php`
 ```php
 <?php
-if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
+if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
 if (empty($arResult)) return;
 ?>
 
-<nav class="simple-dropdown">
-    <ul class="simple-dropdown__list">
+<nav class="dropdown-nav">
+    <ul class="dropdown-nav__list">
         <?php foreach ($arResult as $item): ?>
-            <li class="simple-dropdown__item">
-                <a href="<?= $item['LINK'] ?>" class="simple-dropdown__link">
+            <?php
+            $itemClass = 'dropdown-nav__item';
+            $linkClass = 'dropdown-nav__link';
+
+            if ($item['SELECTED']) {
+                $itemClass .= ' dropdown-nav__item--active';
+                $linkClass .= ' dropdown-nav__link--active';
+            }
+
+            if (!empty($item['CHILDREN'])) {
+                $itemClass .= ' dropdown-nav__item--has-children';
+            }
+            ?>
+
+            <li class="<?= $itemClass ?>">
+                <a href="<?= $item['LINK'] ?>" class="<?= $linkClass ?>">
                     <?= $item['TEXT'] ?>
                     <?php if (!empty($item['CHILDREN'])): ?>
-                        <span class="simple-dropdown__arrow">▼</span>
+                        <span class="dropdown-nav__arrow"></span>
                     <?php endif; ?>
                 </a>
 
                 <?php if (!empty($item['CHILDREN'])): ?>
-                    <ul class="simple-dropdown__submenu">
-                        <?php foreach ($item['CHILDREN'] as $child): ?>
-                            <li class="simple-dropdown__subitem">
-                                <a href="<?= $child['LINK'] ?>" class="simple-dropdown__sublink">
-                                    <?= $child['TEXT'] ?>
-                                    <?php if (!empty($child['CHILDREN'])): ?>
-                                        <span class="simple-dropdown__subarrow">▶</span>
-                                    <?php endif; ?>
-                                </a>
+                    <div class="dropdown-nav__submenu">
+                        <ul class="dropdown-nav__sublist">
+                            <?php foreach ($item['CHILDREN'] as $child): ?>
+                                <?php
+                                $subitemClass = 'dropdown-nav__subitem';
+                                $sublinkClass = 'dropdown-nav__sublink';
 
-                                <?php if (!empty($child['CHILDREN'])): ?>
-                                    <ul class="simple-dropdown__subsubmenu">
-                                        <?php foreach ($child['CHILDREN'] as $subchild): ?>
-                                            <li class="simple-dropdown__subsubitem">
-                                                <a href="<?= $subchild['LINK'] ?>" class="simple-dropdown__subsublink">
-                                                    <?= $subchild['TEXT'] ?>
-                                                </a>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                <?php endif; ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
+                                if ($child['SELECTED']) {
+                                    $subitemClass .= ' dropdown-nav__subitem--active';
+                                    $sublinkClass .= ' dropdown-nav__sublink--active';
+                                }
+
+                                if (!empty($child['CHILDREN'])) {
+                                    $subitemClass .= ' dropdown-nav__subitem--has-children';
+                                }
+                                ?>
+
+                                <li class="<?= $subitemClass ?>">
+                                    <a href="<?= $child['LINK'] ?>" class="<?= $sublinkClass ?>">
+                                        <?= $child['TEXT'] ?>
+                                        <?php if (!empty($child['CHILDREN'])): ?>
+                                            <span class="dropdown-nav__subarrow"></span>
+                                        <?php endif; ?>
+                                    </a>
+
+                                    <?php if (!empty($child['CHILDREN'])): ?>
+                                        <div class="dropdown-nav__subsubmenu">
+                                            <ul class="dropdown-nav__subsublist">
+                                                <?php foreach ($child['CHILDREN'] as $subchild): ?>
+                                                    <?php
+                                                    $subsubitemClass = 'dropdown-nav__subsubitem';
+                                                    $subsublinkClass = 'dropdown-nav__subsublink';
+
+                                                    if ($subchild['SELECTED']) {
+                                                        $subsubitemClass .= ' dropdown-nav__subsubitem--active';
+                                                        $subsublinkClass .= ' dropdown-nav__subsublink--active';
+                                                    }
+                                                    ?>
+
+                                                    <li class="<?= $subsubitemClass ?>">
+                                                        <a href="<?= $subchild['LINK'] ?>" class="<?= $subsublinkClass ?>">
+                                                            <?= $subchild['TEXT'] ?>
+                                                        </a>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                    <?php endif; ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
                 <?php endif; ?>
             </li>
         <?php endforeach; ?>
@@ -52,136 +94,132 @@ if (empty($arResult)) return;
 ```
 ## Файл `style.css`
 ```css
-.simple-dropdown {
-    background: #333;
-    font-family: Arial, sans-serif;
+/* Простое пурпурное меню */
+.dropdown-nav {
+    background: #8a2be2;
+    font-family: Arial;
 }
 
-.simple-dropdown__list {
-    display: flex;
+.dropdown-nav__list {
     margin: 0;
     padding: 0;
     list-style: none;
+    display: flex;
 }
 
-.simple-dropdown__item {
+.dropdown-nav__item {
     position: relative;
 }
 
-.simple-dropdown__item:hover > .simple-dropdown__submenu {
+.dropdown-nav__item:hover > .dropdown-nav__submenu {
     display: block;
 }
 
-/* Ссылки первого уровня */
-.simple-dropdown__link {
+/* Активные элементы */
+.dropdown-nav__item--active {
+    background: #9932cc;
+}
+
+.dropdown-nav__link--active {
+    background: #9932cc;
+    color: white;
+    font-weight: bold;
+}
+
+.dropdown-nav__subitem--active {
+    background: #f5f0ff;
+    border-left: 3px solid #8a2be2;
+}
+
+.dropdown-nav__subsublink--active {
+    background: #f5f0ff;
+    color: #8a2be2;
+    font-weight: bold;
+}
+
+/* Ссылки */
+.dropdown-nav__link {
     display: block;
     padding: 15px 20px;
     color: white;
     text-decoration: none;
-    background: #333;
 }
 
-.simple-dropdown__link:hover {
-    background: #555;
-}
-
-.simple-dropdown__arrow {
-    margin-left: 5px;
-    font-size: 10px;
+.dropdown-nav__link:hover {
+    background: #9932cc;
 }
 
 /* Выпадающее меню */
-.simple-dropdown__submenu {
+.dropdown-nav__submenu {
     display: none;
     position: absolute;
     top: 100%;
     left: 0;
     min-width: 200px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
     background: white;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border: 1px solid #d8bfd8;
+    box-shadow: 0 2px 5px rgba(138, 43, 226, 0.2);
     z-index: 100;
 }
 
-.simple-dropdown__subitem {
-    position: relative;
+.dropdown-nav__sublist {
+    margin: 0;
+    padding: 10px 0;
+    list-style: none;
 }
 
-.simple-dropdown__subitem:hover > .simple-dropdown__subsubmenu {
-    display: block;
-}
-
-/* Ссылки второго уровня */
-.simple-dropdown__sublink {
+.dropdown-nav__sublink {
     display: block;
     padding: 10px 15px;
-    color: #333;
+    color: #4b0082;
     text-decoration: none;
-    border-bottom: 1px solid #eee;
 }
 
-.simple-dropdown__sublink:hover {
-    background: #f5f5f5;
+.dropdown-nav__sublink:hover {
+    background: #f5f0ff;
+    color: #8a2be2;
 }
 
-.simple-dropdown__subarrow {
-    float: right;
-    font-size: 10px;
-}
-
-/* Подменю третьего уровня */
-.simple-dropdown__subsubmenu {
+/* Под-подменю */
+.dropdown-nav__subsubmenu {
     display: none;
     position: absolute;
     top: 0;
     left: 100%;
     min-width: 200px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
     background: white;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border: 1px solid #d8bfd8;
+    box-shadow: 0 2px 5px rgba(138, 43, 226, 0.2);
 }
 
-.simple-dropdown__subsubitem {
+.dropdown-nav__subitem:hover > .dropdown-nav__subsubmenu {
     display: block;
 }
 
-.simple-dropdown__subsublink {
+.dropdown-nav__subsublink {
     display: block;
     padding: 10px 15px;
-    color: #333;
+    color: #841844;
     text-decoration: none;
-    border-bottom: 1px solid #eee;
 }
 
-.simple-dropdown__subsublink:hover {
-    background: #f5f5f5;
+.dropdown-nav__subsublink:hover {
+    background: #f5f0ff;
+    color: #841844;
 }
 
-/* Адаптивность */
+/* Мобильная версия */
 @media (max-width: 768px) {
-    .simple-dropdown__list {
+    .dropdown-nav__list {
         flex-direction: column;
     }
 
-    .simple-dropdown__submenu {
+    .dropdown-nav__submenu,
+    .dropdown-nav__subsubmenu {
         position: static;
         box-shadow: none;
         border: none;
-        border-left: 2px solid #ddd;
-        margin-left: 20px;
-    }
-
-    .simple-dropdown__subsubmenu {
-        position: static;
-        box-shadow: none;
-        border: none;
-        border-left: 2px solid #ddd;
+        border-left: 2px solid #d8bfd8;
         margin-left: 20px;
     }
 }
@@ -195,6 +233,7 @@ $menuList = array();
 $lev = 0;
 $lastInd = 0;
 $parents = array();
+
 foreach ($arResult as $arItem) {
     $lev = $arItem['DEPTH_LEVEL'];
 
@@ -212,5 +251,46 @@ foreach ($arResult as $arItem) {
         $parents[$lev] = &$parents[$lev-1]['CHILDREN'][$lastInd];
     }
 }
+
+// Подсвечиваем родительские элементы активных пунктов
+foreach ($menuList as &$item) {
+    // Проверяем детей первого уровня
+    if (!empty($item['CHILDREN'])) {
+        $hasActiveChild = false;
+
+        foreach ($item['CHILDREN'] as &$child) {
+            // Проверяем внуков
+            if (!empty($child['CHILDREN'])) {
+                $hasActiveGrandChild = false;
+
+                foreach ($child['CHILDREN'] as &$grandchild) {
+                    if ($grandchild['SELECTED']) {
+                        $hasActiveGrandChild = true;
+                        $child['SELECTED'] = true; // Помечаем родителя как активный
+                        break;
+                    }
+                }
+                unset($grandchild);
+
+                if ($hasActiveGrandChild) {
+                    $hasActiveChild = true;
+                }
+            }
+
+            if ($child['SELECTED']) {
+                $hasActiveChild = true;
+            }
+        }
+        unset($child);
+
+        // Если есть активный ребенок, помечаем родителя как активный
+        if ($hasActiveChild && !$item['SELECTED']) {
+            $item['SELECTED'] = true;
+        }
+    }
+}
+unset($item);
+
 $arResult = $menuList;
+?>
 ```
